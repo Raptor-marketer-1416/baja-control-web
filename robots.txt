@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+Disallow: /aviso-de-privacidad/
+Disallow: /terminos-y-condiciones/
+
+Sitemap: https://bajacontroldeplagas.com/sitemap.xml

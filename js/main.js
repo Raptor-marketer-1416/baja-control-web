@@ -77,12 +77,45 @@ function initFAQ() {
 }
 
 // ===========================================
-// 4. TEXT FILL ON SCROLL (H2)
+// 4. TEXT FILL ON SCROLL — palabra por palabra
 // ===========================================
 function initTextFill() {
   const titles = document.querySelectorAll('.section-title');
-  if (!titles.length || !('IntersectionObserver' in window)) {
-    // Fallback: mostrar texto normal sin efecto
+  if (!titles.length) return;
+
+  // Envuelve cada palabra en un span con delay escalonado
+  function wrapWords(el) {
+    let wordIndex = 0;
+
+    function processNode(node) {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const parts = node.textContent.split(/(\s+)/);
+        const frag  = document.createDocumentFragment();
+        parts.forEach(part => {
+          if (part.trim().length) {
+            const span = document.createElement('span');
+            span.className = 'fill-word';
+            span.style.setProperty('--wd', `${wordIndex * 90}ms`);
+            span.textContent = part;
+            frag.appendChild(span);
+            wordIndex++;
+          } else {
+            frag.appendChild(document.createTextNode(part));
+          }
+        });
+        node.parentNode.replaceChild(frag, node);
+      } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName !== 'BR') {
+        [...node.childNodes].forEach(processNode);
+      }
+    }
+
+    [...el.childNodes].forEach(processNode);
+  }
+
+  titles.forEach(wrapWords);
+
+  // Fallback sin IntersectionObserver
+  if (!('IntersectionObserver' in window)) {
     titles.forEach(t => t.classList.add('fill-active'));
     return;
   }
@@ -90,12 +123,11 @@ function initTextFill() {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
-        // Pequeño delay para que el usuario vea el relleno en acción
-        setTimeout(() => entry.target.classList.add('fill-active'), 100);
+        setTimeout(() => entry.target.classList.add('fill-active'), 80);
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.4 });
+  }, { threshold: 0.35 });
 
   titles.forEach(t => observer.observe(t));
 }

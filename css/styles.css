@@ -124,26 +124,49 @@ h1, h2, h3, h4 {
   font-size: clamp(2rem, 5vw, 3.5rem);
   text-align: center;
   margin-bottom: var(--spacing-lg);
-  /* Text fill effect — fondo con gradiente clippeado al texto */
-  background: linear-gradient(to right, var(--color-primary) 50%, #d0d0d0 50%);
-  background-size: 200% 100%;
-  background-position: 100% 0; /* inicia en gris */
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  transition: background-position 0.95s cubic-bezier(0.25, 1, 0.5, 1);
+  color: var(--color-black);
 }
 
 .section-title--light {
-  /* En fondos oscuros: rellena de naranja claro, inicia en gris oscuro */
-  background: linear-gradient(to right, var(--color-primary-lt) 50%, #505050 50%);
-  background-size: 200% 100%;
-  background-position: 100% 0;
+  color: var(--color-white);
 }
 
-/* Estado activo — se dispara con IntersectionObserver */
-.section-title.fill-active {
-  background-position: 0% 0;
+/* Cada palabra del título es un span con transición individual */
+.fill-word {
+  display: inline;
+  color: #c0c0c0;                       /* gris inicial — fondos claros */
+  transition: color 0.45s ease;
+  transition-delay: var(--wd, 0ms);
+}
+
+.section-title--light .fill-word {
+  color: #525252;                       /* gris oscuro — visible en fondo negro */
+}
+
+/* Al activarse: palabras normales toman el color del título */
+.section-title.fill-active .fill-word {
+  color: var(--color-black);
+}
+
+.section-title--light.fill-active .fill-word {
+  color: var(--color-white);
+}
+
+/* Palabras dentro del span accent mantienen su naranja */
+.text-accent .fill-word {
+  color: #c0c0c0;
+}
+
+.section-title--light .text-accent .fill-word {
+  color: #525252;
+}
+
+.section-title.fill-active .text-accent .fill-word {
+  color: var(--color-primary);
+}
+
+.section-title--light.fill-active .text-accent .fill-word {
+  color: var(--color-primary-lt);
 }
 
 .text-accent {

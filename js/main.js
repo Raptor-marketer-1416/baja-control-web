@@ -77,6 +77,30 @@ function initFAQ() {
 }
 
 // ===========================================
+// 4. TEXT FILL ON SCROLL (H2)
+// ===========================================
+function initTextFill() {
+  const titles = document.querySelectorAll('.section-title');
+  if (!titles.length || !('IntersectionObserver' in window)) {
+    // Fallback: mostrar texto normal sin efecto
+    titles.forEach(t => t.classList.add('fill-active'));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        // Pequeño delay para que el usuario vea el relleno en acción
+        setTimeout(() => entry.target.classList.add('fill-active'), 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.4 });
+
+  titles.forEach(t => observer.observe(t));
+}
+
+// ===========================================
 // 4. SCROLL REVEAL
 // ===========================================
 function initReveal() {
@@ -127,6 +151,7 @@ function initHeaderScroll() {
 // ===========================================
 document.addEventListener('DOMContentLoaded', () => {
   initMenu();
+  initTextFill();
   initFAQ();
   initReveal();
   initHeaderScroll();

@@ -124,19 +124,26 @@ h1, h2, h3, h4 {
   font-size: clamp(2rem, 5vw, 3.5rem);
   text-align: center;
   margin-bottom: var(--spacing-lg);
-  color: var(--color-black);
+  /* Text fill effect — fondo con gradiente clippeado al texto */
+  background: linear-gradient(to right, var(--color-primary) 50%, #d0d0d0 50%);
+  background-size: 200% 100%;
+  background-position: 100% 0; /* inicia en gris */
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  transition: background-position 0.95s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .section-title--light {
-  color: var(--color-white);
+  /* En fondos oscuros: rellena de naranja claro, inicia en gris oscuro */
+  background: linear-gradient(to right, var(--color-primary-lt) 50%, #505050 50%);
+  background-size: 200% 100%;
+  background-position: 100% 0;
 }
 
-.section-title span {
-  color: var(--color-primary);
-}
-
-.section-title--light span {
-  color: var(--color-primary-lt);
+/* Estado activo — se dispara con IntersectionObserver */
+.section-title.fill-active {
+  background-position: 0% 0;
 }
 
 .text-accent {

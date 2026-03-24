@@ -15,34 +15,41 @@ const CONFIG = {
 // 2. MENÚ MOBILE
 // ===========================================
 function initMenu() {
-  const burger     = document.querySelector('.header__burger');
-  const mobileMenu = document.getElementById('mobile-menu');
-  if (!burger || !mobileMenu) return;
+  const burger = document.querySelector('.header__burger');
+  const nav    = document.querySelector('.header__nav');
+  if (!burger || !nav) return;
 
   burger.addEventListener('click', () => {
-    const isOpen = burger.classList.toggle('open');
-    mobileMenu.classList.toggle('open', isOpen);
+    const isOpen = nav.classList.toggle('open');
     burger.setAttribute('aria-expanded', String(isOpen));
-    mobileMenu.setAttribute('aria-hidden', String(!isOpen));
+    burger.querySelector('span').textContent = isOpen ? '✕' : '☰';
   });
 
-  // Cerrar al hacer clic en cualquier link del menú
-  mobileMenu.querySelectorAll('a').forEach(link => {
+  // Cerrar al hacer clic en links (excepto padres de dropdown en mobile)
+  nav.querySelectorAll('a:not(.nav__item--has-dropdown > a)').forEach(link => {
     link.addEventListener('click', () => {
-      burger.classList.remove('open');
-      mobileMenu.classList.remove('open');
+      nav.classList.remove('open');
       burger.setAttribute('aria-expanded', 'false');
-      mobileMenu.setAttribute('aria-hidden', 'true');
+      burger.querySelector('span').textContent = '☰';
+    });
+  });
+
+  // Acordeón dropdown en móvil
+  document.querySelectorAll('.nav__item--has-dropdown > a').forEach(link => {
+    link.addEventListener('click', e => {
+      if (window.innerWidth <= 768) {
+        e.preventDefault();
+        link.closest('.nav__item--has-dropdown').classList.toggle('open');
+      }
     });
   });
 
   // Cerrar con Escape
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && mobileMenu.classList.contains('open')) {
-      burger.classList.remove('open');
-      mobileMenu.classList.remove('open');
+    if (e.key === 'Escape' && nav.classList.contains('open')) {
+      nav.classList.remove('open');
       burger.setAttribute('aria-expanded', 'false');
-      mobileMenu.setAttribute('aria-hidden', 'true');
+      burger.querySelector('span').textContent = '☰';
       burger.focus();
     }
   });
@@ -161,21 +168,60 @@ function initReveal() {
 }
 
 // ===========================================
-// 5. HEADER SCROLL SHADOW
+// 5. BOTONES DE CONVERSIÓN FLOTANTES
 // ===========================================
-function initHeaderScroll() {
-  const header = document.querySelector('.header');
-  if (!header) return;
+const CONVERSION_CONFIG = {
+  phone:       '+526862031217',
+  whatsapp:    '526862031217',
+  companyName: 'Baja Control de Plagas'
+};
 
-  const onScroll = () => {
-    if (window.scrollY > 60) {
-      header.style.boxShadow = '0 4px 24px rgba(0,0,0,0.55)';
-    } else {
-      header.style.boxShadow = 'none';
-    }
-  };
+function initBotonesConversion() {
+  // ── WHATSAPP ──────────────────────────────
+  const waModal    = document.getElementById('wa-modal');
+  const waForm     = document.getElementById('wa-form');
+  const waCloseBtns = document.querySelectorAll('.open-wa-modal, .wa-modal-close');
 
-  window.addEventListener('scroll', onScroll, { passive: true });
+  const openWaModal  = () => { waModal.classList.add('active');    document.body.style.overflow = 'hidden'; };
+  const closeWaModal = () => { waModal.classList.remove('active'); document.body.style.overflow = ''; };
+
+  document.querySelectorAll('.open-wa-modal').forEach(btn => btn.addEventListener('click', e => { e.preventDefault(); openWaModal(); }));
+  document.querySelector('.wa-modal-close')?.addEventListener('click', closeWaModal);
+  waModal?.addEventListener('click', e => { if (e.target === waModal) closeWaModal(); });
+
+  waForm?.addEventListener('submit', e => {
+    e.preventDefault();
+    const name    = document.getElementById('wa-name').value.trim();
+    const service = document.getElementById('wa-service').value;
+    if (!name || !service) return;
+
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'whatsapp_lead', lead_name: name, lead_service: service });
+
+    const msg = `Hola, soy ${name}. Me interesa: ${service}.`;
+    window.open(`https://wa.me/${CONVERSION_CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank');
+    closeWaModal();
+    waForm.reset();
+  });
+
+  // ── LLAMADA ───────────────────────────────
+  const callModal      = document.getElementById('call-modal');
+  const confirmCallBtn = document.getElementById('confirm-call-btn');
+  const cancelCallBtn  = document.getElementById('cancel-call-btn');
+
+  const openCallModal  = e => { e.preventDefault(); callModal.classList.add('active');    document.body.style.overflow = 'hidden'; };
+  const closeCallModal = ()  => { callModal.classList.remove('active'); document.body.style.overflow = ''; };
+
+  document.querySelectorAll('.open-call-modal').forEach(btn => btn.addEventListener('click', e => { e.preventDefault(); openCallModal(e); }));
+  cancelCallBtn?.addEventListener('click', closeCallModal);
+  callModal?.addEventListener('click', e => { if (e.target === callModal) closeCallModal(); });
+
+  confirmCallBtn?.addEventListener('click', () => {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'call_confirmed', destination_number: CONVERSION_CONFIG.phone });
+    window.location.href = 'tel:' + CONVERSION_CONFIG.phone;
+    closeCallModal();
+  });
 }
 
 // ===========================================
@@ -186,5 +232,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initTextFill();
   initFAQ();
   initReveal();
-  initHeaderScroll();
+  initBotonesConversion();
 });
